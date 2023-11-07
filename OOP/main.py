@@ -42,7 +42,7 @@ while alive:
             if not isinstance(inhabitant,Friend):
                 print("what will you fight with?")
                 fight_with = input("> ")
-                if inhabitant.fight(fight_with)[0] == True:
+                if inhabitant.fight(fight_with) == True:
                     alive = True
                     if inhabitant.fight(fight_with)[1] is not None:
                         for i in inhabitant.fight(fight_with)[1]:
