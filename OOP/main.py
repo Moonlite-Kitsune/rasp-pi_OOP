@@ -11,7 +11,7 @@ def init_map():
     dining_hall.set_description("A large room with ornate golden decorations on each wall")
     ballroom = Room("ballroom")
     ballroom.set_description("A vast room with a shiny wooden floor; huge candlesticks guard the entrance")
-    exit = Room(exit)
+    exit = Room("exit")
     exit.set_description("Alarge ornate door with a hole in the centre")
     dining_hall.link_room(ballroom,"West")
     ballroom.link_room(dining_hall,"East")
@@ -22,11 +22,11 @@ def init_map():
     print("There are " + str(Room.number_of_rooms) + " rooms to explore.")
     dave = Enemy("Dave","A smelly zombie")
     dave.set_conversation("Brrlgrh... rgrhl... brains...")
-    dave.set_weakness("cheese")
+    dave.set_weakness("Cheese")
     dave.set_items(["1gp","artifact"])
     catrina = Friend("Catrina", "A friendly skeleton")
     cheese = Item("Cheese")
-    Item.set_description("a hard block of cheese")
+    cheese.set_description("a hard block of cheese")
     catrina.set_conversation("Why hello there")
     ballroom.set_character(catrina)
     dining_hall.set_character(dave)
@@ -34,15 +34,21 @@ def init_map():
     current_room = kitchen
     gp = 0
     inventory=[]
-    return alive,current_room,gp,inventory
-alive,current_room,gp,inventory = init_map()         
-while True:		
+    return current_room,gp,inventory
+current_room,gp,inventory = init_map()         
+while True:	
+    if inventory != []:
+        for i in range(len(inventory)-1):
+            if inventory[i][-2:len(inventory[i])] == "gp":
+                gp += int(inventory[i][0:-2])
+                inventory.remove(inventory[i])	
     print("\n")         
     current_room.get_details()
     inhabitant = current_room.get_character()
+    item = current_room.get_item()
     if inhabitant is not None:
         inhabitant.describe()  
-    print("commands:North, South, East, West, Steal, Inventory, Gold, Search, Interact")       
+    print("commands:North, South, East, West,Fight, Steal, Inventory, Gold, Search, Interact")       
     command = input("> ").capitalize()
     if command in ["North","South","East","West"]:  
         current_room = current_room.move(command) 
@@ -53,10 +59,12 @@ while True:
             if not isinstance(inhabitant,Friend):
                 print("what will you fight with?")
                 fight_with = input("> ")
+                fight_with = fight_with.capitalize()
                 if fight_with in inventory:
-                    if inhabitant.fight(fight_with) == True:
-                        if inhabitant.fight(fight_with)[1] is not None:
-                            for i in inhabitant.fight(fight_with)[1]:
+                    fight = inhabitant.fight(fight_with)
+                    if fight[0] == True:
+                        if fight[1] is not None:
+                            for i in fight[1]:
                                 inventory.append(i)
                         current_room.set_character(None)
                     else:
@@ -86,14 +94,10 @@ while True:
             print("you have nothing")
     elif command == "Gold":
         print(f"gold: {gp}")
-    if inventory != []:
-        for i in range(len(inventory)):
-            if inventory[i][-2:len(inventory[i])] == "gp":
-                gp += int(inventory[i][0:-2])
-                inventory.remove(inventory[i])
     elif command == "Interact":
-        if current_room == exit:
-            if "artfact" in inventory:
+        print(current_room.get_name())
+        if current_room.get_name() == "exit":
+            if "artifact" in inventory:
                 print("You place the item in the hole in the door and it swings open")
                 print("Game Over, you escaped")
                 break
@@ -102,10 +106,10 @@ while True:
         else:
             print("there is nothing to interact with")
     elif command == "Search":
-        if current_room.item is not None:
-            print(f"you find a(n) {current_room.item}")
-            inventory.push(current_room.item)
-            current_room.item = None
+        if item is not None:
+            print(f"you find a(n) {item.Name}")
+            inventory.append(item.Name)
+            item = None
         else:
             print("there is nothing in the room")
 RPGInfo.author = "Moonlite_Kitsune"
